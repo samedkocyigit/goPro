@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"goProject/models"
 	"net/http"
 )
 
