@@ -2,16 +2,18 @@ package main
 
 import (
 	"fmt"
-	"goPro/database"
-	"goPro/routes"
+	"goProject/database.go"
+	"goProject/routes"
+
+	"github.com/gorilla/mux"
 )
 
-func main(){
+func main() {
 	err := database.ConnectDB()
 	if err != nil {
-			fmt.Println("Error connecting to database:", err)
-			return
+		fmt.Println("Error connecting to database:", err)
+		return
 	}
 
-	routes.SetupRoutes()
+	routes.SetupRoutes(r)
 }

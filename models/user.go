@@ -6,10 +6,11 @@ import (
 )
 
 type User struct {
-	ID       int
-	Username string
-	Email    string
-	Password string
+	ID              int
+	Username        string
+	Email           string
+	Password        string
+	PasswordConfirm string
 }
 
 var users []User
