@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"goProject/models"
 	"goProject/utils"
 	"net/http"
@@ -10,7 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-func signToken(id int) (string, error) {
+func signToken(id string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["id"] = id
@@ -49,26 +48,18 @@ func createSendToken(user *models.User, statusCode int, res http.ResponseWriter)
 
 func Signup(w http.ResponseWriter, r *http.Request) {
 	newUser := models.User{
-		Name:            r.FormValue("name"),
+		Username:        r.FormValue("name"),
 		Email:           r.FormValue("email"),
 		Password:        r.FormValue("password"),
 		PasswordConfirm: r.FormValue("passwordConfirm"),
 	}
 
 	// Save the new user to the database
-	err := models.AddUser(newUser)
+	err := models.CreateUser(newUser)
 	if err != nil {
 		utils.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	// Send welcome email
-	go func() {
-		url := fmt.Sprintf("%s://%s/me", r.URL.Scheme, r.Host)
-		if err := utils.SendWelcomeEmail(newUser.Email, url); err != nil {
-			fmt.Println("Error sending welcome email:", err)
-		}
-	}()
 
 	createSendToken(&newUser, http.StatusCreated, w)
 }
@@ -78,7 +69,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	user, err := models.GetUserByEmail(email)
-	if err != nil || !user.VerifyPassword(password) {
+	if err != nil || !models.VerifyUserCredentials(email, password) {
 		utils.RespondWithError(w, http.StatusUnauthorized, "Incorrect email or password")
 		return
 	}
