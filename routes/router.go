@@ -11,14 +11,14 @@ import (
 func setupRoutes() {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/users/login", controllers.createUser).Methods("POST")
-	router.HandleFunc("/users/logout", controllers.createUser).Methods("POST")
+	router.HandleFunc("/users/login", controllers.Login).Methods("POST")
+	router.HandleFunc("/users/logout", controllers.Logout).Methods("POST")
 
-	router.HandleFunc("/users", controllers.createUser).Methods("POST")
-	router.HandleFunc("/users", controllers.getUsers).Methods("GET")
-	router.HandleFunc("/users/{id}", controllers.getUser).Methods("GET")
-	router.HandleFunc("/users/{id}", controllers.updateUser).Methods("PUT")
-	router.HandleFunc("/users/{id}", controllers.deleteUser).Methods("DELETE")
+	router.HandleFunc("/users", controllers.CreateUser).Methods("POST")
+	router.HandleFunc("/users", controllers.GetUsers).Methods("GET")
+	router.HandleFunc("/users/{id}", controllers.GetUser).Methods("GET")
+	router.HandleFunc("/users/{id}", controllers.UpdateUser).Methods("PUT")
+	router.HandleFunc("/users/{id}", controllers.DeleteUser).Methods("DELETE")
 
 	http.ListenAndServe(":8080", router)
 
