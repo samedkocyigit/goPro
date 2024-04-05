@@ -2,11 +2,14 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"goProject/models"
 	"net/http"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
-func createUser(w http.ResponseWriter, r *http.Request) {
+func CreateUser(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
@@ -15,7 +18,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// New user adding to database
-	err = models.AddUser(user)
+	err = models.CreateUser(user)
 	if err != nil {
 		http.Error(w, "Failed to add user", http.StatusInternalServerError)
 		return
@@ -25,7 +28,8 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
 }
-func getUser(w http.ResponseWriter, r *http.Request) {
+
+func GetUser(w http.ResponseWriter, r *http.Request) {
 	// get the id from req.params
 	userID := r.URL.Query().Get("id")
 	if userID == "" {
@@ -34,7 +38,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get the user from DB with id
-	user, err := models.GetUser(userID)
+	user, err := models.GetUserByID(userID)
 	if err != nil {
 		http.Error(w, "User not found", http.StatusNotFound)
 		return
@@ -44,9 +48,9 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-func getUsers(w http.ResponseWriter, r *http.Request) {
+func GetUsers(w http.ResponseWriter, r *http.Request) {
 	// Get the all user from DB
-	users, err := models.GetUsers()
+	users, err := models.GetAllUsers()
 	if err != nil {
 		http.Error(w, "Failed to fetch users", http.StatusInternalServerError)
 		return
@@ -56,7 +60,7 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
-func updateUser(w http.ResponseWriter, r *http.Request) {
+func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	// Get the id from req.params
 	userID := r.URL.Query().Get("id")
 	if userID == "" {
@@ -83,7 +87,7 @@ func updateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(updatedUser)
 }
 
-func deleteUser(w http.ResponseWriter, r *http.Request) {
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
 	// Get the id from req.params
 	userID := r.URL.Query().Get("id")
 	if userID == "" {
@@ -92,7 +96,7 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete user
-	err := models.DeleteUser(userID)
+	err := models.DeleteUserByID(userID)
 	if err != nil {
 		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
 		return
@@ -101,4 +105,44 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 	// Success response
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("User deleted successfully"))
+}
+
+func VerifyPassword(user models.User, password string) error {
+	// Kullanıcının parolasını hash'e çevirir
+	hashedPassword := user.Password
+	// Kullanıcının parolası ile verilen parola eşleşip eşleşmediğini kontrol eder
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	if err != nil {
+		return errors.New("incorrect password")
+	}
+	return nil
+}
+
+// CheckPassword, verilen şifre ile şifre teyidi eşleşip eşleşmediğini kontrol eder
+func CheckPassword(password, passwordConfirm string) error {
+	// Şifrelerin eşleşip eşleşmediğini kontrol et
+	if password != passwordConfirm {
+		return errors.New("passwords do not match")
+	}
+
+	// Şifrenin uzunluğunu kontrol et
+	if len(password) < 8 {
+		return errors.New("password must be at least 8 characters long")
+	}
+
+	return nil
+}
+
+// Örnek olarak şifre hashleme işlemi
+func HashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPassword), nil
+}
+
+// Örnek olarak şifre kontrolü işlemi
+func CheckHashedPassword(hashedPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }

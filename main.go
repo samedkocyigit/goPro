@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"goProject/database.go"
 	"goProject/routes"
-
-	"github.com/gorilla/mux"
 )
 
 func main() {
