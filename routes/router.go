@@ -1,14 +1,12 @@
 package routes
 
 import (
-	"net/http"
-
 	"github.com/gorilla/mux"
 
 	"goProject/controllers"
 )
 
-func setupRoutes() {
+func SetupRoutes() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/users/login", controllers.Login).Methods("POST")
@@ -19,7 +17,4 @@ func setupRoutes() {
 	router.HandleFunc("/users/{id}", controllers.GetUser).Methods("GET")
 	router.HandleFunc("/users/{id}", controllers.UpdateUser).Methods("PUT")
 	router.HandleFunc("/users/{id}", controllers.DeleteUser).Methods("DELETE")
-
-	http.ListenAndServe(":8080", router)
-
 }
