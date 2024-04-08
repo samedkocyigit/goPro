@@ -68,8 +68,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	user, err := models.GetUserByEmail(email)
-	if err != nil || !models.VerifyUserCredentials(email, password) {
+	user, err := models.VerifyUserCredentials(email, password)
+	if err != nil {
 		utils.RespondWithError(w, http.StatusUnauthorized, "Incorrect email or password")
 		return
 	}
