@@ -5,6 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+
+	"goProject/routes"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
 
 var db *sql.DB
@@ -17,6 +23,7 @@ func main() {
 	}
 	defer db.Close()
 
+	routes.SetupRoutes()
 	// HTTP sunucusunu başlat
 	StartHTTPServer()
 }
@@ -24,7 +31,7 @@ func main() {
 // ConnectDB MySQL veritabanına bağlanır
 func ConnectDB() error {
 	// MySQL DSN bilgileri
-	dsn := "username:password@tcp(127.0.0.1:3306)/dbname"
+	dsn := "samed123:samed123@tcp(127.0.0.1:3306)/goProject"
 
 	var err error
 	db, err = sql.Open("mysql", dsn)
@@ -44,12 +51,15 @@ func ConnectDB() error {
 
 // StartHTTPServer HTTP sunucusunu başlatır
 func StartHTTPServer() {
-	// HTTP sunucusu başlatılıyor
-	http.HandleFunc("/", HomeHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
 
-// HomeHandler örnek bir HTTP handler fonksiyonudur
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the server!")
+	if err := godotenv.Load("config.env"); err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	// HTTP sunucusu başlatılıyor
+	port := os.Getenv("PORT")
+	host := os.Getenv("LOCALHOST")
+
+	// Değerleri kullanarak HTTP sunucusunu başlat
+	log.Printf("Starting server on %s:%s", host, port)
+	log.Fatal(http.ListenAndServe(host+":"+port, nil))
 }

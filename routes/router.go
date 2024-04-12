@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 
 	"goProject/controllers"
@@ -17,4 +19,7 @@ func SetupRoutes() {
 	router.HandleFunc("/users/{id}", controllers.GetUser).Methods("GET")
 	router.HandleFunc("/users/{id}", controllers.UpdateUser).Methods("PUT")
 	router.HandleFunc("/users/{id}", controllers.DeleteUser).Methods("DELETE")
+
+	http.Handle("/", router)
+
 }
